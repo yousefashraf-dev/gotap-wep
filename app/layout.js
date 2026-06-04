@@ -8,10 +8,17 @@ export const metadata = {
   description: 'Your smart profile page',
 }
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
+
 export default function RootLayout({ children }) {
   return (
     <html lang="ar" dir="ltr" className={inter.className}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased overflow-x-hidden" style={{ touchAction: 'manipulation' }}>{children}</body>
     </html>
   )
 }

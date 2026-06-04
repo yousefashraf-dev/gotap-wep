@@ -18,10 +18,10 @@ export default function BrandBadge() {
     <a
       href={appDeepLink}
       onClick={handleClick}
-      className="group inline-flex items-center gap-2.5 px-4 py-2 bg-white/[0.02] border border-white/[0.06] rounded-full backdrop-blur-xl transition-all duration-300 hover:border-cyan-500/30 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+      className="group inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#1F222F]/60 border border-cyan-400/20 transition-all duration-200 hover:border-cyan-400/50 hover:shadow-[0_0_12px_rgba(34,211,238,0.15)]"
     >
-      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/60 group-hover:bg-cyan-400 transition-colors duration-300" />
-      <span className="text-[9px] font-mono tracking-[0.25em] uppercase text-gray-600 group-hover:text-gray-400 transition-colors duration-300">
+      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/50 group-hover:bg-cyan-400 transition-colors duration-200" />
+      <span className="text-[8px] font-mono tracking-[0.25em] uppercase text-gray-500 group-hover:text-gray-300 transition-colors duration-200">
         Powered by GoTap.eg
       </span>
     </a>
