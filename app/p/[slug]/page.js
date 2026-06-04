@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation'
 import { db } from '@/lib/firebaseAdmin'
 import { Phone, MessageCircle } from 'lucide-react'
 import SocialButton from '@/components/SocialButton'
@@ -129,11 +128,11 @@ export default async function ProfilePage({ params }) {
   const p = doc.data()
 
   const links = [
-    p.instagram && { key: 'instagram', label: 'Instagram', icon: InstagramIcon, color: 'text-pink-400', href: resolve('instagram', p.instagram), appDeepLink: getAppDeepLink('instagram', p.instagram) },
-    p.tiktok && { key: 'tiktok', label: 'TikTok', icon: TikTokIcon, color: 'text-cyan-400', href: resolve('tiktok', p.tiktok), appDeepLink: getAppDeepLink('tiktok', p.tiktok) },
-    p.facebook && { key: 'facebook', label: 'Facebook', icon: FacebookIcon, color: 'text-blue-500', href: resolve('facebook', p.facebook), appDeepLink: getAppDeepLink('facebook', p.facebook) },
-    p.whatsapp && { key: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: 'text-[#25D366]', href: resolve('whatsapp', p.whatsapp) },
-    p.phone && { key: 'phone', label: 'Phone', icon: Phone, color: 'text-sky-400', href: resolve('phone', p.phone) },
+    p.instagram && { key: 'instagram', label: 'Instagram', icon: <InstagramIcon />, color: 'text-pink-400', href: resolve('instagram', p.instagram), appDeepLink: getAppDeepLink('instagram', p.instagram) },
+    p.tiktok && { key: 'tiktok', label: 'TikTok', icon: <TikTokIcon />, color: 'text-cyan-400', href: resolve('tiktok', p.tiktok), appDeepLink: getAppDeepLink('tiktok', p.tiktok) },
+    p.facebook && { key: 'facebook', label: 'Facebook', icon: <FacebookIcon />, color: 'text-blue-500', href: resolve('facebook', p.facebook), appDeepLink: getAppDeepLink('facebook', p.facebook) },
+    p.whatsapp && { key: 'whatsapp', label: 'WhatsApp', icon: <MessageCircle size={14} />, color: 'text-[#25D366]', href: resolve('whatsapp', p.whatsapp) },
+    p.phone && { key: 'phone', label: 'Phone', icon: <Phone size={14} />, color: 'text-sky-400', href: resolve('phone', p.phone) },
   ].filter(Boolean)
 
   return (

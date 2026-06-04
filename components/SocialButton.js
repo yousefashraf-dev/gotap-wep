@@ -2,7 +2,7 @@
 
 import { ArrowUpRight } from 'lucide-react'
 
-export default function SocialButton({ href, appDeepLink, label, icon: Icon, iconColor }) {
+export default function SocialButton({ href, appDeepLink, label, icon, iconColor }) {
   function handleClick(e) {
     if (appDeepLink) {
       e.preventDefault()
@@ -24,7 +24,7 @@ export default function SocialButton({ href, appDeepLink, label, icon: Icon, ico
     >
       <ArrowUpRight size={12} className="absolute top-2 right-2 text-white/15 group-hover:text-white/50 transition-colors" />
       <div className={`${iconColor} w-4 h-4 flex items-center justify-center shrink-0`}>
-        <Icon size={14} />
+        {icon}
       </div>
       <span className="text-sm font-medium tracking-wide">{label}</span>
     </a>
