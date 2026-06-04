@@ -29,6 +29,16 @@ function FacebookIcon({ size = 16 }) {
   )
 }
 
+function SnapchatIcon({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3c-4 0-7 2.5-7 6.5 0 2.5 1 4.5 2.5 5.5l-1 2.5c-.3.8.3 1.5 1 1.5h9c.7 0 1.3-.7 1-1.5l-1-2.5c1.5-1 2.5-3 2.5-5.5 0-4-3-6.5-7-6.5z" />
+      <circle cx="9" cy="9" r="1" fill="currentColor" />
+      <circle cx="15" cy="9" r="1" fill="currentColor" />
+    </svg>
+  )
+}
+
 function extractHandle(value) {
   let v = (value || '').trim().replace(/^@/, '')
   // handle profile.php?id=xxx for Facebook deep links
@@ -52,7 +62,7 @@ function extractHandle(value) {
 function resolve(key, value) {
   if (!value) return null
   // URL-based platforms store full links from the admin sanitizer — return as-is
-  if (['instagram', 'tiktok', 'facebook'].includes(key)) return value
+  if (['instagram', 'tiktok', 'facebook', 'snapchat'].includes(key)) return value
   const clean = extractHandle(value)
   switch (key) {
     case 'phone':
@@ -138,6 +148,7 @@ export default async function ProfilePage({ params }) {
     p.instagram && { key: 'instagram', label: 'Instagram', icon: <InstagramIcon />, color: 'text-pink-400', href: resolve('instagram', p.instagram), appDeepLink: getAppDeepLink('instagram', p.instagram) },
     p.tiktok && { key: 'tiktok', label: 'TikTok', icon: <TikTokIcon />, color: 'text-cyan-400', href: resolve('tiktok', p.tiktok), appDeepLink: getAppDeepLink('tiktok', p.tiktok) },
     p.facebook && { key: 'facebook', label: 'Facebook', icon: <FacebookIcon />, color: 'text-blue-500', href: resolve('facebook', p.facebook), appDeepLink: getAppDeepLink('facebook', p.facebook) },
+    p.snapchat && { key: 'snapchat', label: 'Snapchat', icon: <SnapchatIcon />, color: 'text-yellow-400', href: resolve('snapchat', p.snapchat) },
     p.whatsapp && { key: 'whatsapp', label: 'WhatsApp', icon: <MessageCircle size={16} />, color: 'text-emerald-400', href: resolve('whatsapp', p.whatsapp) },
     p.phone && { key: 'phone', label: 'Phone', icon: <Phone size={16} />, color: 'text-sky-400', href: resolve('phone', p.phone) },
   ].filter(Boolean)

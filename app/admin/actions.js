@@ -3,7 +3,7 @@
 import { profilesCollection } from '@/lib/firebaseAdmin'
 
 export async function saveProfile(data) {
-  const { slug, name, imageUrl, whatsapp, phone, instagram, facebook, tiktok } =
+  const { slug, name, imageUrl, whatsapp, phone, instagram, facebook, tiktok, snapchat } =
     data
 
   if (!slug || !name) {
@@ -25,6 +25,7 @@ export async function saveProfile(data) {
     instagram: instagram || null,
     facebook: facebook || null,
     tiktok: tiktok || null,
+    snapchat: snapchat || null,
     updatedAt: new Date().toISOString(),
   }
 

@@ -12,6 +12,7 @@ const platforms = [
   { key: 'instagram', label: 'Instagram', icon: InstagramIcon, hint: 'Username or URL' },
   { key: 'tiktok', label: 'TikTok', icon: TikTokIcon, hint: 'Username or URL' },
   { key: 'facebook', label: 'Facebook', icon: FacebookIcon, hint: 'Username or URL' },
+  { key: 'snapchat', label: 'Snapchat', icon: SnapchatIcon, hint: 'Username or URL' },
   { key: 'whatsapp', label: 'WhatsApp', icon: WhatsAppIcon, hint: 'Phone number' },
   { key: 'phone', label: 'Phone', icon: PhoneIcon, hint: 'Phone number' },
 ]
@@ -29,6 +30,21 @@ const socialConfig = {
   instagram: { base: 'https://www.instagram.com', pattern: /(?:https?:\/\/)?(?:www\.)?instagram\.com\/([^/?]+)/i, prefix: '' },
   tiktok:    { base: 'https://www.tiktok.com',    pattern: /(?:https?:\/\/)?(?:www\.)?tiktok\.com\/@?([^/?]+)/i,  prefix: '@' },
   facebook:  { base: 'https://www.facebook.com',  pattern: /(?:https?:\/\/)?(?:www\.)?(?:m\.|mbasic\.)?facebook\.com\/([^/?]+)/i, prefix: '' },
+  snapchat:  { base: 'https://www.snapchat.com/add', pattern: /(?:https?:\/\/)?(?:www\.)?snapchat\.com\/add\/([^/?]+)/i, prefix: '' },
+}
+
+function SnapchatIcon({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3c-4 0-7 2.5-7 6.5 0 2.5 1 4.5 2.5 5.5l-1 2.5c-.3.8.3 1.5 1 1.5h9c.7 0 1.3-.7 1-1.5l-1-2.5c1.5-1 2.5-3 2.5-5.5 0-4-3-6.5-7-6.5z" />
+      <circle cx="9" cy="9" r="1" fill="currentColor" />
+      <circle cx="15" cy="9" r="1" fill="currentColor" />
+    </svg>
+  )
+}
+
+function normalizeUrl(str) {
+  return str.startsWith('http') ? str : `https://${str}`
 }
 
 function sanitizeSocialInput(key, value) {
@@ -38,39 +54,41 @@ function sanitizeSocialInput(key, value) {
   const cfg = socialConfig[key]
   if (!cfg) return value
 
-  // Try to extract handle from known URL pattern
+  // ── Facebook share links — preserve full path ──
+  if (key === 'facebook') {
+    if (/facebook\.com\/share\//i.test(value) || /fb\.com\/share\//i.test(value)) {
+      return normalizeUrl(value)
+        .replace(/^https?:\/\/(?:www\.)?(?:m\.)?(?:facebook|fb)\.com/i, 'https://www.facebook.com')
+    }
+    if (/profile\.php/i.test(value)) {
+      try {
+        const u = new URL(normalizeUrl(value))
+        const id = u.searchParams.get('id')
+        if (id) return `https://www.facebook.com/profile.php?id=${id}`
+      } catch {}
+    }
+  }
+
+  // Try known platform pattern
+  let handle = null
   let match = value.match(cfg.pattern)
   if (!match && key === 'facebook') {
     match = value.match(/(?:https?:\/\/)?fb\.com\/([^/?]+)/i)
   }
-  if (match) {
-    // preserve profile.php?id=... for Facebook
-    if (key === 'facebook' && value.includes('profile.php')) {
-      try {
-        const u = new URL(value.startsWith('http') ? value : `https://${value}`)
-        const id = u.searchParams.get('id')
-        if (id) return `${cfg.base}/profile.php?id=${id}`
-      } catch {}
-    }
-    return `${cfg.base}/${cfg.prefix}${match[1]}`
-  }
+  if (match) handle = match[1]
 
-  // Looks like a domain — try to extract trailing handle
-  if (/\.\w{2,}/.test(value) || value.includes('/')) {
+  // Pattern didn't match but looks like a URL — extract trailing segment
+  if (!handle && (/\.\w{2,}/.test(value) || value.includes('/'))) {
     try {
-      const u = new URL(value.startsWith('http') ? value : `https://${value}`)
-      if (key === 'facebook' && u.pathname.includes('profile.php')) {
-        const id = u.searchParams.get('id')
-        if (id) return `${cfg.base}/profile.php?id=${id}`
-      }
+      const u = new URL(normalizeUrl(value))
       const parts = u.pathname.replace(/\/+$/, '').split('/')
-      const handle = parts.pop()
-      if (handle) return `${cfg.base}/${cfg.prefix}${handle}`
+      handle = parts.pop()
     } catch {}
-    return value
   }
 
-  // Raw handle — prepend domain
+  if (handle) return `${cfg.base}/${cfg.prefix}${handle}`
+
+  // Raw username — prepend domain
   return `${cfg.base}/${cfg.prefix}${value.replace(/^@/, '')}`
 }
 
@@ -79,7 +97,7 @@ export default function AdminPage() {
   const slugLocked = useRef(false)
   const [form, setForm] = useState({
     name: '', slug: '', imageUrl: '',
-    instagram: '', tiktok: '', facebook: '', whatsapp: '', phone: '',
+    instagram: '', tiktok: '', facebook: '', snapchat: '', whatsapp: '', phone: '',
   })
   const [preview, setPreview] = useState(null)
   const [uploading, setUploading] = useState(false)
@@ -145,7 +163,7 @@ export default function AdminPage() {
       slug, name, imageUrl: form.imageUrl,
       whatsapp: form.whatsapp.trim(), phone: form.phone.trim(),
       instagram: form.instagram.trim(), facebook: form.facebook.trim(),
-      tiktok: form.tiktok.trim(),
+      tiktok: form.tiktok.trim(), snapchat: form.snapchat.trim(),
     })
     setSaving(false)
     if (res.error) setError(res.error)
@@ -381,7 +399,7 @@ export default function AdminPage() {
               {/* Create another */}
               <div className="text-center pt-2">
                 <button
-                  onClick={() => { setSuccess(false); setSavedLink(''); setWasCreated(false); setCopied(false); setForm({ name: '', slug: '', imageUrl: '', instagram: '', tiktok: '', facebook: '', whatsapp: '', phone: '' }); setPreview(null); slugLocked.current = false }}
+                  onClick={() => { setSuccess(false); setSavedLink(''); setWasCreated(false); setCopied(false); setForm({ name: '', slug: '', imageUrl: '', instagram: '', tiktok: '', facebook: '', snapchat: '', whatsapp: '', phone: '' }); setPreview(null); slugLocked.current = false }}
                   className="text-gray-600 hover:text-gray-400 text-[10px] font-mono uppercase tracking-[0.2em] transition-colors"
                 >
                   &lsaquo; Deploy Another Profile
