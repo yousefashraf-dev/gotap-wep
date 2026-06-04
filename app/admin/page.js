@@ -55,11 +55,12 @@ export default function AdminPage() {
   const [savedLink, setSavedLink] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [wasCreated, setWasCreated] = useState(false)
   const [copied, setCopied] = useState(false)
 
   function set(key, value) {
     setForm(f => ({ ...f, [key]: value }))
-    setError(''); setSuccess(false); setSavedLink(''); setCopied(false)
+    setError(''); setSuccess(false); setSavedLink(''); setWasCreated(false); setCopied(false)
   }
 
   function handleNameChange(value) {
@@ -101,7 +102,7 @@ export default function AdminPage() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setError(''); setSuccess(false); setSavedLink(''); setCopied(false)
+    setError(''); setSuccess(false); setSavedLink(''); setWasCreated(false); setCopied(false)
     const name = form.name.trim()
     const slug = form.slug.trim().toLowerCase()
     if (!name || !slug) return setError('NAME and SLUG fields are required')
@@ -118,6 +119,7 @@ export default function AdminPage() {
     if (res.error) setError(res.error)
     else {
       setSuccess(true)
+      setWasCreated(res.created)
       setSavedLink(`https://gotap-wep.vercel.app/p/${res.slug}`)
     }
   }
@@ -286,8 +288,8 @@ export default function AdminPage() {
                   </svg>
                 </div>
                 <div className="text-center">
-                  <p className="text-cyan-400 text-xs font-mono tracking-[0.3em] uppercase">SYSTEM INITIALIZATION COMPLETE</p>
-                  <h2 className="text-white text-lg font-bold mt-1 tracking-tight">Profile Synchronized</h2>
+                  <p className="text-cyan-400 text-xs font-mono tracking-[0.3em] uppercase">SYSTEM {wasCreated ? 'INITIALIZED' : 'SYNCHRONIZED'}</p>
+                  <h2 className="text-white text-lg font-bold mt-1 tracking-tight">Profile {wasCreated ? 'Deployed' : 'Updated'}</h2>
                   <p className="text-gray-500 text-xs mt-1 font-mono">NFC link ready for deployment</p>
                 </div>
               </div>
@@ -347,7 +349,7 @@ export default function AdminPage() {
               {/* Create another */}
               <div className="text-center pt-2">
                 <button
-                  onClick={() => { setSuccess(false); setSavedLink(''); setCopied(false); setForm({ name: '', slug: '', imageUrl: '', instagram: '', tiktok: '', facebook: '', whatsapp: '', phone: '' }); setPreview(null); slugLocked.current = false }}
+                  onClick={() => { setSuccess(false); setSavedLink(''); setWasCreated(false); setCopied(false); setForm({ name: '', slug: '', imageUrl: '', instagram: '', tiktok: '', facebook: '', whatsapp: '', phone: '' }); setPreview(null); slugLocked.current = false }}
                   className="text-gray-600 hover:text-gray-400 text-[10px] font-mono uppercase tracking-[0.2em] transition-colors"
                 >
                   &lsaquo; Deploy Another Profile

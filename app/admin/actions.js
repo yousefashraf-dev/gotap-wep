@@ -17,10 +17,6 @@ export async function saveProfile(data) {
   const docRef = profilesCollection.doc(slug)
   const doc = await docRef.get()
 
-  if (doc.exists) {
-    return { error: 'This slug is already taken' }
-  }
-
   const profile = {
     name,
     imageUrl: imageUrl || null,
@@ -29,10 +25,15 @@ export async function saveProfile(data) {
     instagram: instagram || null,
     facebook: facebook || null,
     tiktok: tiktok || null,
-    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   }
 
-  await docRef.set(profile)
+  const isNew = !doc.exists
+  if (isNew) {
+    profile.createdAt = new Date().toISOString()
+  }
 
-  return { success: true, slug }
+  await docRef.set(profile, { merge: true })
+
+  return { success: true, slug, created: isNew }
 }
