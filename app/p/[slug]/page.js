@@ -100,8 +100,11 @@ export default async function ProfilePage({ params }) {
 
   if (!db) {
     return (
-      <main className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <p className="text-gray-500 text-sm">Profile unavailable</p>
+      <main className="min-h-screen bg-[#0F111A] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border border-cyan-500/40 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-600 text-xs font-mono tracking-wider uppercase">Connection lost</p>
+        </div>
       </main>
     )
   }
@@ -111,16 +114,19 @@ export default async function ProfilePage({ params }) {
     doc = await db.collection('profiles').doc(slug).get()
   } catch {
     return (
-      <main className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <p className="text-gray-500 text-sm">Profile unavailable</p>
+      <main className="min-h-screen bg-[#0F111A] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-4 h-4 rounded-full bg-amber-500/30 animate-pulse" />
+          <p className="text-gray-600 text-xs font-mono tracking-wider uppercase">Profile unavailable</p>
+        </div>
       </main>
     )
   }
 
   if (!doc.exists) {
     return (
-      <main className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <p className="text-gray-500 text-sm">Profile not found</p>
+      <main className="min-h-screen bg-[#0F111A] flex items-center justify-center">
+        <p className="text-gray-600 text-xs font-mono tracking-wider uppercase">Profile not found</p>
       </main>
     )
   }
@@ -136,42 +142,55 @@ export default async function ProfilePage({ params }) {
   ].filter(Boolean)
 
   return (
-    <main className="relative min-h-dvh bg-[#050505] overflow-hidden flex flex-col">
+    <main className="relative min-h-dvh bg-[#0F111A] overflow-hidden flex flex-col">
 
+      {/* Mesh / glow orbs */}
       <div className="fixed inset-0 pointer-events-none select-none">
-        <div className="absolute top-[-15%] left-1/2 -translate-x-1/2 w-[80%] aspect-square rounded-full bg-purple-600/10 blur-[200px]" />
-        <div className="absolute bottom-[-20%] right-[-15%] w-[70%] aspect-square rounded-full bg-pink-600/5 blur-[180px]" />
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[70%] aspect-square rounded-full bg-purple-600/8 blur-[200px]" />
+        <div className="absolute bottom-[-15%] right-[-10%] w-[60%] aspect-square rounded-full bg-cyan-600/5 blur-[200px]" />
+        <div className="absolute top-[30%] left-[-10%] w-[40%] aspect-square rounded-full bg-pink-600/4 blur-[180px]" />
       </div>
 
-      <header className="relative z-10 pt-8 pb-2">
-        <p className="text-center text-xs font-light tracking-[0.3em] uppercase text-gray-500">
-          GoTap.eg
+      {/* Scan-line overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.015]" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(6,182,212,0.4) 1px, rgba(6,182,212,0.4) 2px)' }} />
+
+      <header className="relative z-10 pt-6 pb-2">
+        <p className="text-center text-[9px] font-mono tracking-[0.35em] uppercase text-gray-600">
+          GoTap.eg Terminal
         </p>
       </header>
 
       <div className="relative z-10 flex-1 flex flex-col items-center px-6 pt-6 pb-8 max-w-sm mx-auto w-full">
 
-        <div className="mb-6">
-          {p.imageUrl ? (
-            <img
-              src={p.imageUrl}
-              alt={p.name}
-              className="rounded-full w-28 h-28 object-cover mx-auto ring-2 ring-white/10 shadow-2xl shadow-black"
-            />
-          ) : (
-            <div className="bg-white/5 border border-white/10 rounded-full w-28 h-28 flex items-center justify-center mx-auto">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gray-500">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
+        {/* Avatar with neon ring */}
+        <div className="relative mb-5">
+          <div className="absolute inset-0 rounded-full bg-cyan-500/20 blur-xl animate-pulse" />
+          <div className="relative w-28 h-28 rounded-full p-[2px] bg-gradient-to-b from-cyan-400/60 via-cyan-500/30 to-transparent">
+            <div className="w-full h-full rounded-full overflow-hidden bg-[#0F111A]">
+              {p.imageUrl ? (
+                <img
+                  src={p.imageUrl}
+                  alt={p.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="text-gray-600">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
-        <h1 className="text-2xl font-bold tracking-tight text-white mt-4 mb-8 text-center">
+        {/* Name with neon glow */}
+        <h1 className="text-2xl font-bold tracking-tight text-white text-center mt-2 mb-8 [text-shadow:0_0_20px_rgba(6,182,212,0.3),0_0_40px_rgba(6,182,212,0.1)]">
           {p.name}
         </h1>
 
+        {/* Social links grid */}
         {links.length > 0 && (
           <div className="grid grid-cols-2 gap-2.5 w-full">
             {links.map((link) => (
@@ -189,7 +208,7 @@ export default async function ProfilePage({ params }) {
 
         {links.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-gray-700 text-sm">No links available</p>
+            <p className="text-gray-700 text-sm font-mono tracking-wider">No links configured</p>
           </div>
         )}
       </div>
