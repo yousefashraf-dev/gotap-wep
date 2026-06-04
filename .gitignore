@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# firebase service account
+gotap-eg-firebase-adminsdk-fbsvc-60796f005d.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
