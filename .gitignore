@@ -39,6 +39,9 @@ yarn-error.log*
 # firebase service account
 gotap-eg-firebase-adminsdk-fbsvc-60796f005d.json
 
+# last-save (personal session notes — never commit)
+last-save
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
