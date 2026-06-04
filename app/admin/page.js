@@ -9,9 +9,9 @@ import WhatsAppIcon from '@/components/icons/WhatsAppIcon'
 import PhoneIcon from '@/components/icons/PhoneIcon'
 
 const platforms = [
-  { key: 'instagram', label: 'Instagram', icon: InstagramIcon, hint: 'Username' },
-  { key: 'tiktok', label: 'TikTok', icon: TikTokIcon, hint: '@username' },
-  { key: 'facebook', label: 'Facebook', icon: FacebookIcon, hint: 'Username' },
+  { key: 'instagram', label: 'Instagram', icon: InstagramIcon, hint: 'Username or URL' },
+  { key: 'tiktok', label: 'TikTok', icon: TikTokIcon, hint: 'Username or URL' },
+  { key: 'facebook', label: 'Facebook', icon: FacebookIcon, hint: 'Username or URL' },
   { key: 'whatsapp', label: 'WhatsApp', icon: WhatsAppIcon, hint: 'Phone number' },
   { key: 'phone', label: 'Phone', icon: PhoneIcon, hint: 'Phone number' },
 ]
@@ -25,21 +25,53 @@ function generateSlug(name) {
     .replace(/^-|-$/g, '')
 }
 
-const urlPatterns = {
-  instagram: /(?:https?:\/\/)?(?:www\.)?instagram\.com\/([^/?]+)/i,
-  tiktok: /(?:https?:\/\/)?(?:www\.)?tiktok\.com\/@?([^/?]+)/i,
-  facebook: /(?:https?:\/\/)?(?:www\.)?facebook\.com\/([^/?]+)/i,
-  whatsapp: /(?:https?:\/\/)?wa\.me\/([^/?]+)/i,
+const socialConfig = {
+  instagram: { base: 'https://www.instagram.com', pattern: /(?:https?:\/\/)?(?:www\.)?instagram\.com\/([^/?]+)/i, prefix: '' },
+  tiktok:    { base: 'https://www.tiktok.com',    pattern: /(?:https?:\/\/)?(?:www\.)?tiktok\.com\/@?([^/?]+)/i,  prefix: '@' },
+  facebook:  { base: 'https://www.facebook.com',  pattern: /(?:https?:\/\/)?(?:www\.)?(?:m\.|mbasic\.)?facebook\.com\/([^/?]+)/i, prefix: '' },
 }
 
 function sanitizeSocialInput(key, value) {
   value = value.trim()
-  const pattern = urlPatterns[key]
-  if (pattern) {
-    const match = value.match(pattern)
-    if (match) return match[1]
+  if (key === 'whatsapp' || key === 'phone') return value
+
+  const cfg = socialConfig[key]
+  if (!cfg) return value
+
+  // Try to extract handle from known URL pattern
+  let match = value.match(cfg.pattern)
+  if (!match && key === 'facebook') {
+    match = value.match(/(?:https?:\/\/)?fb\.com\/([^/?]+)/i)
   }
-  return value
+  if (match) {
+    // preserve profile.php?id=... for Facebook
+    if (key === 'facebook' && value.includes('profile.php')) {
+      try {
+        const u = new URL(value.startsWith('http') ? value : `https://${value}`)
+        const id = u.searchParams.get('id')
+        if (id) return `${cfg.base}/profile.php?id=${id}`
+      } catch {}
+    }
+    return `${cfg.base}/${cfg.prefix}${match[1]}`
+  }
+
+  // Looks like a domain — try to extract trailing handle
+  if (/\.\w{2,}/.test(value) || value.includes('/')) {
+    try {
+      const u = new URL(value.startsWith('http') ? value : `https://${value}`)
+      if (key === 'facebook' && u.pathname.includes('profile.php')) {
+        const id = u.searchParams.get('id')
+        if (id) return `${cfg.base}/profile.php?id=${id}`
+      }
+      const parts = u.pathname.replace(/\/+$/, '').split('/')
+      const handle = parts.pop()
+      if (handle) return `${cfg.base}/${cfg.prefix}${handle}`
+    } catch {}
+    return value
+  }
+
+  // Raw handle — prepend domain
+  return `${cfg.base}/${cfg.prefix}${value.replace(/^@/, '')}`
 }
 
 export default function AdminPage() {
@@ -220,7 +252,7 @@ export default function AdminPage() {
                   <h2 className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-mono">Social Links</h2>
                   <span className="text-gray-600 text-[9px] uppercase tracking-wider font-mono">Optional</span>
                 </div>
-                <p className="text-gray-600 text-[10px] mb-3 font-mono leading-relaxed">Paste full URLs — usernames are extracted automatically. Empty fields are hidden on the public page.</p>
+                <p className="text-gray-600 text-[10px] mb-3 font-mono leading-relaxed">Enter a username or paste any full URL — handles facebook.com, m.facebook.com, fb.com, and profile.php links automatically.</p>
                 <div className="space-y-2">
                   {platforms.map(({ key, label, icon: Icon, hint }) => (
                     <div

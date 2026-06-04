@@ -31,6 +31,11 @@ function FacebookIcon({ size = 16 }) {
 
 function extractHandle(value) {
   let v = (value || '').trim().replace(/^@/, '')
+  // handle profile.php?id=xxx for Facebook deep links
+  if (v.includes('profile.php')) {
+    const id = new URL(v.startsWith('http') ? v : `https://${v}`).searchParams.get('id')
+    if (id) return id
+  }
   if (v.includes('/') || v.includes('.')) {
     try {
       const url = new URL(v.startsWith('http') ? v : `https://${v}`)
@@ -46,18 +51,14 @@ function extractHandle(value) {
 
 function resolve(key, value) {
   if (!value) return null
+  // URL-based platforms store full links from the admin sanitizer — return as-is
+  if (['instagram', 'tiktok', 'facebook'].includes(key)) return value
   const clean = extractHandle(value)
   switch (key) {
     case 'phone':
       return `tel:${clean.replace(/[^0-9+]/g, '')}`
     case 'whatsapp':
       return `https://wa.me/${clean.replace(/^0/, '20').replace(/^\+/, '').replace(/[^0-9]/g, '')}`
-    case 'tiktok':
-      return `https://tiktok.com/@${clean}`
-    case 'instagram':
-      return `https://instagram.com/${clean}`
-    case 'facebook':
-      return `https://facebook.com/${clean}`
     default:
       return clean
   }
